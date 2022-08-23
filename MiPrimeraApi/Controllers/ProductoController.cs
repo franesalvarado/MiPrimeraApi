@@ -57,5 +57,24 @@ namespace MiPrimeraApi.Controllers
                 return false;
             }
         }
+
+        [HttpDelete]
+        public bool EliminarProducto([FromBody] int id)
+        {
+            try
+            {
+                bool result = ProductoVendidoHandler.EliminarVendidoProducto(id);
+                if (result)
+                {
+                    return ProductoHandler.EliminarProducto(id);
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
     }
 }

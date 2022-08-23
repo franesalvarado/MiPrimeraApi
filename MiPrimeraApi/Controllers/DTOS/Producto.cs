@@ -17,4 +17,11 @@
         public int Stock { get; set; }
         public int IdUsuario { get; set; }
     }
+
+    public class PutStockProducto
+    {
+        public int Id { get; set; }
+        public int Stock { get; set; }
+    }
+
 }

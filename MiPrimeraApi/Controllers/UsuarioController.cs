@@ -10,7 +10,7 @@ namespace MiPrimeraApi.Controllers
     public class UsuarioController : ControllerBase
     {
         [HttpGet(Name = "GetUsuarios")]
-        public List <Model.Usuario> GetUsuarios()
+        public List <Usuario> GetUsuarios()
         {
             return UsuarioHandler.GetUsuarios();
         }
@@ -29,6 +29,7 @@ namespace MiPrimeraApi.Controllers
             }
         }
 
+        /*
         [HttpPut]
         public bool ModificarNombreDeUsuario([FromBody] PutNombreUsuario usuario)
         {
@@ -38,6 +39,7 @@ namespace MiPrimeraApi.Controllers
                 Nombre = usuario.Nombre
             });
         }
+        */
 
         [HttpPut]
         public bool ModificarUsuario([FromBody] PutUsuario usuario)
@@ -62,7 +64,7 @@ namespace MiPrimeraApi.Controllers
         }
 
         [HttpPost]
-        public bool CrearUsuario([FromBody] DTOS.PostUsuario usuario)
+        public bool CrearUsuario([FromBody] PostUsuario usuario)
         {
             try
             {

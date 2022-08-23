@@ -49,7 +49,6 @@ namespace MiPrimeraApi.Repository
 
             return resultados;
         }
-
         public static bool CrearProducto(PostProducto producto)
         {
             if (string.IsNullOrEmpty(producto.Descripciones))
@@ -60,7 +59,7 @@ namespace MiPrimeraApi.Repository
             bool resultado = false;
             using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             {
-                string queryInsert = "INSERT INTO [SistemaGestion].[dbo].[[roducto] " +
+                string queryInsert = "INSERT INTO [SistemaGestion].[dbo].[Producto] " +
                     "(Descripciones, Costo, PrecioVenta, Stock, IdUsuario) VALUES " +
                     "(@Descripciones, @Costo, @PrecioVenta, @Stock, @IdUsuario);";
 
@@ -126,6 +125,105 @@ namespace MiPrimeraApi.Repository
                 }
 
                 sqlConnection.Close();
+            }
+            return resultado;
+        }
+        public static int CheckStockProducto(int Id, int Stock)
+        {
+            int resultado = -1;
+            int queryStock = 0;
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection.Open();
+                    sqlCommand.CommandText = "SELECT Stock FROM Producto WHERE Id = @Id;";
+
+
+                    SqlParameter sqlParameter = new SqlParameter("Id", System.Data.SqlDbType.BigInt);
+                    sqlParameter.Value = Id;
+
+                    sqlCommand.Parameters.Add(sqlParameter);
+
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+
+                    sqlDataAdapter.SelectCommand = sqlCommand;
+
+                    DataTable table = new DataTable();
+                    sqlDataAdapter.Fill(table);
+
+                    sqlCommand.Connection.Close();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        queryStock = Convert.ToInt32(row["Stock"]);
+                    }
+                }
+            }
+            if (queryStock >= Stock)
+            {
+                resultado = queryStock - Stock;
+            }
+
+            return resultado;
+        }
+        public static bool ModificarStockProducto(PutProducto producto)
+        {
+            bool resultado = false;
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string queryInsert = "UPDATE [SistemaGestion].[dbo].[Producto] " +
+                    "SET Stock = @Stock, IdUsuario = @IdUsuario " +
+                    "WHERE Id = @Id";
+
+                SqlParameter idParameter = new SqlParameter("Id", SqlDbType.BigInt) { Value = producto.Id };
+                SqlParameter stockParameter = new SqlParameter("Stock", SqlDbType.VarChar) { Value = producto.Stock };
+                SqlParameter idUsuarioParameter = new SqlParameter("IdUsuario", SqlDbType.VarChar) { Value = producto.IdUsuario };
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(queryInsert, sqlConnection))
+                {
+                    sqlCommand.Parameters.Add(idParameter);
+                    sqlCommand.Parameters.Add(stockParameter);
+                    sqlCommand.Parameters.Add(idUsuarioParameter);
+
+                    int numberOfRows = sqlCommand.ExecuteNonQuery();
+                    if (numberOfRows > 0)
+                    {
+                        resultado = true;
+                    }
+                }
+                sqlConnection.Close();
+            }
+            return resultado;
+        }
+        public static bool EliminarProducto(int id)
+        {
+            bool resultado = false;
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string queryDeleteProducto = "DELETE FROM Producto WHERE Id=@Id";
+
+                SqlParameter sqlParameter = new SqlParameter("Id", System.Data.SqlDbType.BigInt);
+                sqlParameter.Value = id;
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommandProducto = new SqlCommand(queryDeleteProducto, sqlConnection))
+                {
+                    sqlCommandProducto.Parameters.Add(sqlParameter);
+                    int numberOfRows = sqlCommandProducto.ExecuteNonQuery();
+                    if (numberOfRows > 0)
+                    {
+                        resultado = true;
+                    }
+                }
+                                    
+                sqlConnection.Close();
+
             }
             return resultado;
         }
