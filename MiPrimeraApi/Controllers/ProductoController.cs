@@ -9,12 +9,6 @@ namespace MiPrimeraApi.Controllers
     [Route("[controller]")]
     public class ProductoController : ControllerBase
     {
-        [HttpGet(Name = "GetProducto")]
-        public List<Producto> GetProductos()
-        {
-            return ProductoHandler.GetProductos();
-        }
-
         [HttpPost]
         public bool CrearProducto([FromBody] PostProducto producto)
         {
@@ -55,6 +49,20 @@ namespace MiPrimeraApi.Controllers
             {
                 Console.WriteLine(ex.Message);
                 return false;
+            }
+        }
+
+        [HttpGet]
+        public List<Producto> GetProductos()
+        {
+            try
+            {
+                return ProductoHandler.GetProductos();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
             }
         }
 

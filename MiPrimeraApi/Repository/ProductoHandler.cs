@@ -49,6 +49,51 @@ namespace MiPrimeraApi.Repository
 
             return resultados;
         }
+        public static List<Producto> GetProductosPorIdUsuario(int idUsuario)
+        {
+            List<Producto> resultados = new List<Producto>();
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection.Open();
+                    sqlCommand.CommandText = "SELECT * FROM Producto WHERE IdUsuario=@IdUsuario;";
+
+                    SqlParameter sqlParameter = new SqlParameter("IdUsuario", System.Data.SqlDbType.BigInt);
+                    sqlParameter.Value = idUsuario;
+
+                    sqlCommand.Parameters.Add(sqlParameter);
+
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+
+                    sqlDataAdapter.SelectCommand = sqlCommand;
+
+                    DataTable table = new DataTable();
+                    sqlDataAdapter.Fill(table);
+
+                    sqlCommand.Connection.Close();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        Producto producto = new Producto();
+
+                        producto.Id = Convert.ToInt32(row["Id"]);
+                        producto.Stock = Convert.ToInt32(row["Stock"]);
+                        producto.IdUsuario = Convert.ToInt32(row["IdUsuario"]);
+                        producto.Costo = Convert.ToInt32(row["Costo"]);
+                        producto.PrecioVenta = Convert.ToInt32(row["PrecioVenta"]);
+                        producto.Descripciones = row["Descripciones"].ToString();
+
+                        resultados.Add(producto);
+
+                    }
+                }
+            }
+
+            return resultados;
+        }
         public static bool CrearProducto(PostProducto producto)
         {
             if (string.IsNullOrEmpty(producto.Descripciones))
@@ -128,7 +173,7 @@ namespace MiPrimeraApi.Repository
             }
             return resultado;
         }
-        public static int CheckStockProducto(int Id, int Stock)
+        public static int CheckStockProductoPostVenta(int Id, int Stock)
         {
             int resultado = -1;
             int queryStock = 0;
@@ -169,7 +214,7 @@ namespace MiPrimeraApi.Repository
 
             return resultado;
         }
-        public static bool ModificarStockProducto(PutProducto producto)
+        public static bool ModificarStockProductoPostVenta(PutProducto producto)
         {
             bool resultado = false;
             using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
@@ -179,8 +224,8 @@ namespace MiPrimeraApi.Repository
                     "WHERE Id = @Id";
 
                 SqlParameter idParameter = new SqlParameter("Id", SqlDbType.BigInt) { Value = producto.Id };
-                SqlParameter stockParameter = new SqlParameter("Stock", SqlDbType.VarChar) { Value = producto.Stock };
-                SqlParameter idUsuarioParameter = new SqlParameter("IdUsuario", SqlDbType.VarChar) { Value = producto.IdUsuario };
+                SqlParameter stockParameter = new SqlParameter("Stock", SqlDbType.Int) { Value = producto.Stock };
+                SqlParameter idUsuarioParameter = new SqlParameter("IdUsuario", SqlDbType.BigInt) { Value = producto.IdUsuario };
 
                 sqlConnection.Open();
 
@@ -189,6 +234,76 @@ namespace MiPrimeraApi.Repository
                     sqlCommand.Parameters.Add(idParameter);
                     sqlCommand.Parameters.Add(stockParameter);
                     sqlCommand.Parameters.Add(idUsuarioParameter);
+
+                    int numberOfRows = sqlCommand.ExecuteNonQuery();
+                    if (numberOfRows > 0)
+                    {
+                        resultado = true;
+                    }
+                }
+                sqlConnection.Close();
+            }
+            return resultado;
+        }
+        public static int CheckStockProductoPostCancelacionVenta(int Id, int Stock)
+        {
+            int resultado = -1;
+            int queryStock = 0;
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection.Open();
+                    sqlCommand.CommandText = "SELECT Stock FROM Producto WHERE Id = @Id;";
+
+
+                    SqlParameter sqlParameter = new SqlParameter("Id", System.Data.SqlDbType.BigInt);
+                    sqlParameter.Value = Id;
+
+                    sqlCommand.Parameters.Add(sqlParameter);
+
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+
+                    sqlDataAdapter.SelectCommand = sqlCommand;
+
+                    DataTable table = new DataTable();
+                    sqlDataAdapter.Fill(table);
+
+                    sqlCommand.Connection.Close();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        queryStock = Convert.ToInt32(row["Stock"]);
+                    }
+                }
+            }
+            if (queryStock >= Stock)
+            {
+                resultado = queryStock + Stock;
+            }
+
+            return resultado;
+        }
+        public static bool ModificarStockProductoPostCancelacionVenta(PutProducto producto)
+        {
+            bool resultado = false;
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string queryInsert = "UPDATE [SistemaGestion].[dbo].[Producto] " +
+                    "SET Stock = @Stock" +
+                    "WHERE Id = @Id";
+
+                SqlParameter idParameter = new SqlParameter("Id", SqlDbType.BigInt) { Value = producto.Id };
+                SqlParameter stockParameter = new SqlParameter("Stock", SqlDbType.Int) { Value = producto.Stock };
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(queryInsert, sqlConnection))
+                {
+                    sqlCommand.Parameters.Add(idParameter);
+                    sqlCommand.Parameters.Add(stockParameter);
 
                     int numberOfRows = sqlCommand.ExecuteNonQuery();
                     if (numberOfRows > 0)

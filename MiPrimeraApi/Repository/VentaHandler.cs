@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using MiPrimeraApi.Controllers.DTOS;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace MiPrimeraApi.Repository
@@ -65,6 +66,88 @@ namespace MiPrimeraApi.Repository
             }
             return id;
         }
+        public static bool EliminarVenta(int id)
+        {
+            bool resultado = false;
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string queryDeleteProducto = "DELETE FROM Venta WHERE Id=@Id";
+
+                SqlParameter sqlParameter = new SqlParameter("Id", System.Data.SqlDbType.BigInt);
+                sqlParameter.Value = id;
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommandProducto = new SqlCommand(queryDeleteProducto, sqlConnection))
+                {
+                    sqlCommandProducto.Parameters.Add(sqlParameter);
+                    int numberOfRows = sqlCommandProducto.ExecuteNonQuery();
+                    if (numberOfRows > 0)
+                    {
+                        resultado = true;
+                    }
+                }
+
+                sqlConnection.Close();
+
+            }
+            return resultado;
+        }
+        public static List<TodasVentas> GetVentas()
+        {
+            List<TodasVentas> ventas = new List<TodasVentas>();
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection.Open();
+                    sqlCommand.CommandText = "SELECT " +
+                        "Venta.Id as idVenta, " +
+                        "Venta.Comentarios as ventaComentario, " +
+                        "ProductoVendido.Id as productoVendidoId, " +
+                        "ProductoVendido.Stock as productoVendidoStock, " +
+                        "Producto.Id as productoId, " +
+                        "Producto.Descripciones as productoDescripciones, " +
+                        "Producto.Costo as productoCosto, " +
+                        "Producto.PrecioVenta as productoPrecioVenta, " +
+                        "Producto.Stock as productoStock " +
+                        "FROM Venta " +
+                        "INNER JOIN ProductoVendido ON Venta.Id = ProductoVendido.IdVenta " +
+                        "INNER JOIN Producto ON Producto.Id = ProductoVendido.IdProducto; ";
+
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+
+                    sqlDataAdapter.SelectCommand = sqlCommand;
+
+                    DataTable table = new DataTable();
+                    sqlDataAdapter.Fill(table);
+
+                    sqlCommand.Connection.Close();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        TodasVentas venta = new TodasVentas();
+
+                        venta.IdVenta = Convert.ToInt32(row["idVenta"]);
+                        venta.VentaComentario = row["ventaComentario"].ToString();
+                        venta.ProductoVendidoId = Convert.ToInt32(row["productoVendidoId"]);
+                        venta.ProductoVendidoStock = Convert.ToInt32(row["productoVendidoStock"]);
+                        venta.ProductoId = Convert.ToInt32(row["productoId"]);
+                        venta.ProductoDescripciones = row["productoDescripciones"].ToString();
+                        venta.ProductoCosto = Convert.ToInt32(row["productoCosto"]);
+                        venta.PrecioVenta = Convert.ToInt32(row["productoPrecioVenta"]);
+                        venta.ProductoStock = Convert.ToInt32(row["productoStock"]);
+
+                        ventas.Add(venta);
+
+                    }
+                }
+            }
+            return ventas;
+        }
+
+
     }
 
 }

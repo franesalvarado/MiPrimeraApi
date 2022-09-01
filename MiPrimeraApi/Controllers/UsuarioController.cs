@@ -9,18 +9,19 @@ namespace MiPrimeraApi.Controllers
     [Route("[controller]")]
     public class UsuarioController : ControllerBase
     {
-        [HttpGet(Name = "GetUsuarios")]
-        public List <Usuario> GetUsuarios()
-        {
-            return UsuarioHandler.GetUsuarios();
-        }
-
-        [HttpDelete]
-        public bool EliminarUsuario([FromBody] int id)
+        [HttpPost]
+        public bool CrearUsuario([FromBody] PostUsuario usuario)
         {
             try
             {
-                return UsuarioHandler.EliminarUsuario(id);
+                return UsuarioHandler.CrearUsuario(new PostUsuario
+                {
+                    Apellido = usuario.Apellido,
+                    Contraseña = usuario.Contraseña,
+                    Mail = usuario.Mail,
+                    Nombre = usuario.Nombre,
+                    NombreUsuario = usuario.NombreUsuario
+                });
             }
             catch (Exception ex)
             {
@@ -29,17 +30,19 @@ namespace MiPrimeraApi.Controllers
             }
         }
 
-        /*
-        [HttpPut]
-        public bool ModificarNombreDeUsuario([FromBody] PutNombreUsuario usuario)
+        [HttpGet]
+        public Usuario ObtenerUsuario(string obtenerUsuario)
         {
-            return UsuarioHandler.ModificarNombreDeUsuario(new PutNombreUsuario
+            try
             {
-                Id = usuario.Id,
-                Nombre = usuario.Nombre
-            });
+                return UsuarioHandler.ObtenerUsuario(obtenerUsuario);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
-        */
 
         [HttpPut]
         public bool ModificarUsuario([FromBody] PutUsuario usuario)
@@ -63,19 +66,12 @@ namespace MiPrimeraApi.Controllers
             }
         }
 
-        [HttpPost]
-        public bool CrearUsuario([FromBody] PostUsuario usuario)
+        [HttpDelete]
+        public bool EliminarUsuario([FromBody] int id)
         {
             try
             {
-                return UsuarioHandler.CrearUsuario(new PostUsuario
-                {
-                    Apellido = usuario.Apellido,
-                    Contraseña = usuario.Contraseña,
-                    Mail = usuario.Mail,
-                    Nombre = usuario.Nombre,
-                    NombreUsuario = usuario.NombreUsuario
-                });
+                return UsuarioHandler.EliminarUsuario(id);
             }
             catch (Exception ex)
             {
@@ -83,7 +79,6 @@ namespace MiPrimeraApi.Controllers
                 return false;
             }
         }
-
 
     }
 }

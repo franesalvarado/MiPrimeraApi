@@ -8,72 +8,6 @@ namespace MiPrimeraApi.Repository
     public static class UsuarioHandler
     {
         public const string ConnectionString = "Server=INFORMATICA-DEV\\SQLEXPRESS;Initial Catalog=SistemaGestion;Trusted_Connection=True";
-
-        public static List<Usuario> GetUsuarios()
-        {
-            List<Usuario> resultado = new List<Usuario>();
-
-            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand sqlCommand = new SqlCommand("SELECT * FROM Usuario", sqlConnection))
-                {
-                    sqlConnection.Open();
-                    
-                    using (SqlDataReader dataReader = sqlCommand.ExecuteReader())
-                    {
-                        if (dataReader.HasRows)
-                        {
-                            while (dataReader.Read())
-                            {
-                                Usuario usuario = new Usuario();
-
-                                usuario.Id = Convert.ToInt32(dataReader["Id"]);
-                                usuario.NombreUsuario = dataReader["NombreUsuario"].ToString();
-                                usuario.Nombre = dataReader["Nombre"].ToString();
-                                usuario.Apellido = dataReader["Apellido"].ToString();
-                                usuario.Contraseña = dataReader["Contraseña"].ToString();
-                                usuario.Mail = dataReader["Mail"].ToString();
-
-                                resultado.Add(usuario);
-                            }
-                        }
-                    }
-
-                    sqlConnection.Close();
-                }
-            }
-            return resultado;
-        }
-
-        public static bool EliminarUsuario(int id)
-        {
-            bool resultado = false;
-            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
-            {
-                string queryDelete = "DELETE FROM Usuario WHERE Id=@Id";
-
-                SqlParameter sqlParameter = new SqlParameter("id", System.Data.SqlDbType.BigInt);
-                sqlParameter.Value = id;
-
-                sqlConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand(queryDelete, sqlConnection))
-                {
-                    sqlCommand.Parameters.Add(sqlParameter);
-                    int numberOfRows = sqlCommand.ExecuteNonQuery();
-                    if (numberOfRows > 0)
-                    {
-                        resultado = true;
-                    }
-                }
-
-
-                sqlConnection.Close();
-                
-            }
-            return resultado;
-        }
-
         public static bool CrearUsuario(PostUsuario usuario)
         {
             bool resultado = false;
@@ -110,38 +44,6 @@ namespace MiPrimeraApi.Repository
             }
             return resultado;
         }
-
-        public static bool ModificarNombreDeUsuario(PutNombreUsuario usuario)
-        {
-            bool resultado = false;
-            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
-            {
-                string queryInsert = "UPDATE [SistemaGestion].[dbo].[Usuario] " +
-                    "SET Nombre = @nombre" +
-                    "WHERE Id = @Id";
-
-                SqlParameter nombreParameter = new SqlParameter("nombre", SqlDbType.VarChar) { Value = usuario.Nombre };
-                SqlParameter idParameter = new SqlParameter("id", SqlDbType.BigInt) { Value = usuario.Id };
-
-                sqlConnection.Open();
-
-                using (SqlCommand sqlCommand = new SqlCommand(queryInsert, sqlConnection))
-                {
-                    sqlCommand.Parameters.Add(nombreParameter);
-                    sqlCommand.Parameters.Add(idParameter);
-
-                    int numberOfRows = sqlCommand.ExecuteNonQuery();
-                    if (numberOfRows > 0)
-                    {
-                        resultado = true;
-                    }
-                }
-
-                sqlConnection.Close();
-            }
-            return resultado;
-        }
-
         public static bool ModificarUsuario(PutUsuario usuario)
         {
             bool resultado = false;
@@ -180,5 +82,74 @@ namespace MiPrimeraApi.Repository
             }
             return resultado;
         }
+        public static Usuario ObtenerUsuario(string nombreUsuario)
+        {
+            Usuario resultado = new Usuario();
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string query = "SELECT * FROM Usuario WHERE NombreUsuario=@NombreUsuario";
+
+                SqlParameter nombreUsuarioParameter = new SqlParameter("NombreUsuario", System.Data.SqlDbType.VarChar);
+                nombreUsuarioParameter.Value = nombreUsuario;
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(query, sqlConnection))
+                {
+                    
+                    using (SqlDataReader dataReader = sqlCommand.ExecuteReader())
+                    {
+                        if (dataReader.HasRows)
+                        {
+                            while (dataReader.Read())
+                            {
+                                resultado.Id = Convert.ToInt32(dataReader["Id"]);
+                                resultado.NombreUsuario = dataReader["NombreUsuario"].ToString();
+                                resultado.Nombre = dataReader["Nombre"].ToString();
+                                resultado.Apellido = dataReader["Apellido"].ToString();
+                                resultado.Contraseña = dataReader["Contraseña"].ToString();
+                                resultado.Mail = dataReader["Mail"].ToString();
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Usuario no encontrado");
+                        }
+                    }
+                }
+                sqlConnection.Close();
+            }
+            return resultado;
+        }
+        public static bool EliminarUsuario(int id)
+        {
+            bool resultado = false;
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string queryDelete = "DELETE FROM Usuario WHERE Id=@Id";
+
+                SqlParameter sqlParameter = new SqlParameter("id", System.Data.SqlDbType.BigInt);
+                sqlParameter.Value = id;
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommand = new SqlCommand(queryDelete, sqlConnection))
+                {
+                    sqlCommand.Parameters.Add(sqlParameter);
+                    int numberOfRows = sqlCommand.ExecuteNonQuery();
+                    if (numberOfRows > 0)
+                    {
+                        resultado = true;
+                    }
+                }
+
+
+                sqlConnection.Close();
+                
+            }
+            return resultado;
+        }
+
     }
 }

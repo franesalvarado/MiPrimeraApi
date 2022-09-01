@@ -65,7 +65,111 @@ namespace MiPrimeraApi.Repository
             }
             return resultado;
         }
+        public static List<GetProductoVendido> ObtenerProductoVendidoPorIdVenta(int id)
+        {
+            List<GetProductoVendido> resultados = new List<GetProductoVendido>();
 
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection.Open();
+                    sqlCommand.CommandText = "SELECT * FROM ProductoVendido WHERE IdVenta = @Id;";
+
+                    SqlParameter queryParameter = new SqlParameter("Id", System.Data.SqlDbType.BigInt);
+                    queryParameter.Value = id;
+
+                    sqlCommand.Parameters.Add(queryParameter);
+
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+                    sqlDataAdapter.SelectCommand = sqlCommand;
+
+                    DataTable table = new DataTable();
+                    sqlDataAdapter.Fill(table);
+
+                    sqlCommand.Connection.Close();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        GetProductoVendido productoVendido = new GetProductoVendido();
+
+                        productoVendido.Id = Convert.ToInt32(row["Id"]);
+                        productoVendido.Stock = Convert.ToInt32(row["Stock"]);
+                        productoVendido.IdProducto = Convert.ToInt32(row["IdUsuario"]);
+                        productoVendido.IdVenta = Convert.ToInt32(row["Costo"]);
+
+                        resultados.Add(productoVendido);
+
+                    }
+                }
+            }
+
+            return resultados;
+        }
+        public static void EliminarProductoVendidoPorIdVenta(int id)
+        {
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                string queryDeleteProducto = "DELETE FROM ProductoVendido WHERE IdVenta=@Id";
+
+                SqlParameter sqlParameter = new SqlParameter("IdVenta", System.Data.SqlDbType.BigInt);
+                sqlParameter.Value = id;
+
+                sqlConnection.Open();
+
+                using (SqlCommand sqlCommandProducto = new SqlCommand(queryDeleteProducto, sqlConnection))
+                {
+                    sqlCommandProducto.Parameters.Add(sqlParameter);
+                    sqlCommandProducto.ExecuteNonQuery();
+                }
+
+                sqlConnection.Close();
+
+            }
+        }
+        public static List<GetProductoVendido> ObtenerProductosVendidosPorUsuario(int id)
+        {
+            List<GetProductoVendido> resultados = new List<GetProductoVendido>();
+
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand())
+                {
+                    sqlCommand.Connection = sqlConnection;
+                    sqlCommand.Connection.Open();
+                    sqlCommand.CommandText = "SELECT * FROM ProductoVendido WHERE IdProducto = @Id;";
+
+                    SqlParameter queryParameter = new SqlParameter("Id", System.Data.SqlDbType.BigInt);
+                    queryParameter.Value = id;
+
+                    sqlCommand.Parameters.Add(queryParameter);
+
+                    SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+                    sqlDataAdapter.SelectCommand = sqlCommand;
+
+                    DataTable table = new DataTable();
+                    sqlDataAdapter.Fill(table);
+
+                    sqlCommand.Connection.Close();
+
+                    foreach (DataRow row in table.Rows)
+                    {
+                        GetProductoVendido productoVendido = new GetProductoVendido();
+
+                        productoVendido.Id = Convert.ToInt32(row["Id"]);
+                        productoVendido.Stock = Convert.ToInt32(row["Stock"]);
+                        productoVendido.IdProducto = Convert.ToInt32(row["IdUsuario"]);
+                        productoVendido.IdVenta = Convert.ToInt32(row["Costo"]);
+
+                        resultados.Add(productoVendido);
+
+                    }
+                }
+            }
+
+            return resultados;
+        }
 
     }
 }
